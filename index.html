@@ -1,412 +1,934 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplicativo de Monitoramento de Flora</title>
-  <!-- Manifesto PWA para permitir instalação offline -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2e7d32">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Clube de Pesquisa e Desenvolvimento Científico</title>
+  <meta name="description" content="Encontro online semanal com certificado. Autonomia científica com prática orientada, discussão de artigos e R aplicado para análise de dados." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <meta property="og:title" content="Clube de Pesquisa e Desenvolvimento Científico" />
+  <meta property="og:description" content="Encontro online semanal com certificado. Autonomia científica com prática orientada, discussão de artigos e R aplicado." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:image" content="https://i1.rgstatic.net/ii/profile.image/591755300851720-1518096866872_Q512/Danilo-Rangel.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Clube de Pesquisa e Desenvolvimento Científico" />
+  <meta name="twitter:description" content="Encontro online semanal com certificado. Autonomia científica com prática orientada, discussão de artigos e R aplicado." />
+  <meta name="twitter:image" content="https://i1.rgstatic.net/ii/profile.image/591755300851720-1518096866872_Q512/Danilo-Rangel.jpg" />
+
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+  <link rel="preconnect" href="https://i1.rgstatic.net" crossorigin />
+  <link rel="preconnect" href="https://www.r-project.org" crossorigin />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23ffffff' d='M0 0h64v64H0z'/%3E%3Cpath fill='%23111827' d='M18 44V20h4v20h-4zm10 0V20h4v20h-4zm10 0V20h4v20h-4z'/%3E%3C/svg%3E" />
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f5f5f5;
+    :root {
+      --bg: #ffffff;
+      --ink: #0f172a;
+      --muted: rgba(15, 23, 42, 0.72);
+      --muted2: rgba(15, 23, 42, 0.60);
+      --card: rgba(255, 255, 255, 0.92);
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
+      --shadow2: 0 10px 26px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+      --radius2: 24px;
+      --brand: #2563eb;
+      --brand2: #22c55e;
+      --warn: #f59e0b;
+      --max: 920px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
-    h1 {
-      text-align: center;
-      color: #2e7d32;
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(900px 700px at 12% 0%, rgba(37, 99, 235, 0.08), transparent 60%),
+        radial-gradient(900px 700px at 88% 10%, rgba(34, 197, 94, 0.07), transparent 60%),
+        radial-gradient(900px 700px at 50% 100%, rgba(245, 158, 11, 0.07), transparent 60%),
+        var(--bg);
+      line-height: 1.55;
+      letter-spacing: 0.1px;
+      scroll-behavior: smooth;
     }
-    form {
+
+    a { color: inherit; text-decoration: none; }
+
+    :focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.28);
+      outline-offset: 3px;
+      border-radius: 10px;
+    }
+
+    .skip {
+      position: absolute;
+      left: -9999px;
+      top: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: var(--shadow2);
+      font-weight: 950;
+      color: rgba(15, 23, 42, 0.86);
+    }
+
+    .skip:focus { left: 10px; z-index: 80; }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 16px 98px;
+    }
+
+    .feed {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 10px;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      gap: 14px;
     }
-    label {
-      display: flex;
-      flex-direction: column;
-      font-size: 0.9rem;
-      color: #333;
+
+    .post {
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }
-    input, select, textarea {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      margin-top: 4px;
+
+    .post-inner { padding: 18px; }
+
+    .hero {
+      padding: 22px 18px 18px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.80)),
+        url('https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=1800&q=70') center/cover no-repeat;
     }
-    textarea {
-      resize: vertical;
-    }
-    .buttons {
-      margin-top: 15px;
+
+    .pill-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 13px;
+      max-width: 100%;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--warn);
+      box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .ic {
+      width: 18px;
+      height: 18px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(37, 99, 235, 0.14));
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .ic svg { width: 12px; height: 12px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
       justify-content: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--muted);
+      font-weight: 950;
+      font-size: 12px;
+      white-space: nowrap;
     }
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.9rem;
+
+    .rlogo {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.14);
+      background: rgba(255, 255, 255, 0.86);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    .rlogo img {
+      width: 14px;
+      height: 14px;
+      display: block;
+      opacity: 0.92;
+    }
+
+    .mini-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      font-weight: 950;
+      font-size: 13px;
+      color: rgba(15, 23, 42, 0.78);
+      max-width: 100%;
+    }
+
+    .chip small { font-weight: 950; color: var(--muted); }
+
+    h1 {
+      margin: 12px 0 8px;
+      font-size: clamp(26px, 5vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0.2px;
+    }
+
+    .headline {
+      margin: 0 0 10px;
+      font-weight: 950;
+      font-size: 16px;
+      color: rgba(15, 23, 42, 0.86);
+      max-width: 76ch;
+    }
+
+    p { margin: 0 0 12px; color: var(--muted); }
+
+    .subtitle {
+      color: rgba(15, 23, 42, 0.78);
+      font-size: 15px;
+      max-width: 78ch;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow2);
+      font-weight: 950;
+      font-size: 14px;
+      user-select: none;
+      transition: transform 0.08s ease, background 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 1); }
+
+    .btn.primary {
+      border: 1px solid rgba(37, 99, 235, 0.22);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), rgba(34, 197, 94, 0.08));
+    }
+
+    .btn.ghost { background: rgba(255, 255, 255, 0.72); }
+
+    .tiny {
+      font-size: 13px;
+      color: var(--muted2);
+      margin-top: 10px;
+    }
+
+    .bullets {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .bullet {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .check {
+      width: 20px;
+      height: 20px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.24), rgba(37, 99, 235, 0.18));
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      display: grid;
+      place-items: center;
+      margin-top: 1px;
+    }
+
+    .check svg { width: 13px; height: 13px; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .split { grid-template-columns: 1fr; }
+    }
+
+    .box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 14px;
+    }
+
+    .box.emph {
+      border: 1px solid rgba(37, 99, 235, 0.20);
+      box-shadow: var(--shadow2);
+    }
+
+    ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+    li { margin: 6px 0; }
+
+    .price {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 10px;
+    }
+
+    .price strong { font-size: 34px; letter-spacing: 0.2px; }
+
+    .price span {
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .note {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 13px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+
+    .note b { color: var(--ink); }
+
+    details {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    details + details { margin-top: 10px; }
+
+    summary {
       cursor: pointer;
+      font-weight: 950;
+      color: var(--ink);
+      list-style: none;
     }
-    #locBtn { background: #0288d1; color: #fff; }
-    #saveBtn { background: #2e7d32; color: #fff; }
-    #downloadDocsBtn { background: #6a1b9a; color: #fff; }
-    #downloadExcelBtn { background: #ef6c00; color: #fff; }
-    #clearRecordsBtn { background: #c62828; color: #fff; }
+
+    summary::-webkit-details-marker { display: none; }
+
+    details p { margin-top: 10px; }
+
+    .profile {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 14px;
+      align-items: start;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.88)),
+        url('https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1800&q=70') center/cover no-repeat;
+    }
+
+    @media (max-width: 520px) {
+      .profile { grid-template-columns: 1fr; }
+    }
+
+    .avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow2);
+    }
+
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .kpi { grid-template-columns: 1fr; }
+    }
+
+    .kpi .k {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.82);
+      padding: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .kpi .k b { display: block; color: var(--ink); margin-bottom: 4px; }
+
+    .bar {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    .float {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 14px;
+      z-index: 60;
+      width: min(620px, calc(100% - 26px));
+    }
+
+    .float-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .float-inner .left {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .float-inner .left b {
+      font-size: 13px;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .float-inner .left span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .wbtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.22);
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(37, 99, 235, 0.10));
+      font-weight: 950;
+      font-size: 13px;
+      box-shadow: var(--shadow2);
+      white-space: nowrap;
+    }
+
+    .wbtn svg { width: 16px; height: 16px; }
+
+    .linklist {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .alink {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      font-weight: 900;
+      color: rgba(15, 23, 42, 0.78);
+      transition: transform 0.08s ease;
+    }
+
+    .alink:hover { transform: translateY(-1px); }
+
+    .alink span { color: var(--muted); font-weight: 900; font-size: 13px; white-space: nowrap; }
+
+    .anchor-target { scroll-margin-top: 18px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html, body { scroll-behavior: auto; }
+      .btn, .alink { transition: none; }
+      .btn:hover, .alink:hover { transform: none; }
+    }
   </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "Clube de Pesquisa e Desenvolvimento Científico",
+    "description": "Encontro online semanal com certificado. Autonomia científica com prática orientada, discussão de artigos e R aplicado.",
+    "telephone": "+55-22-99752-5542",
+    "founder": {
+      "@type": "Person",
+      "name": "Danilo Rangel",
+      "jobTitle": "Mediador",
+      "image": "https://i1.rgstatic.net/ii/profile.image/591755300851720-1518096866872_Q512/Danilo-Rangel.jpg"
+    }
+  }
+  </script>
 </head>
 <body>
-  <h1>Monitoramento de Flora</h1>
-  <form id="floraForm" onsubmit="return false;">
-    <label for="id_arvore">ID da árvore
-      <input type="text" id="id_arvore" name="id_arvore" placeholder="Identificador único da árvore">
-    </label>
-    <label for="x">Latitude (x)
-      <input type="text" id="x" name="x" placeholder="Latitude">
-    </label>
-    <label for="y">Longitude (y)
-      <input type="text" id="y" name="y" placeholder="Longitude">
-    </label>
-    <label for="DAP_cm">DAP (cm)
-      <input type="number" id="DAP_cm" name="DAP_cm" step="0.1" placeholder="Diâmetro à altura do peito">
-    </label>
-    <label for="altura_m">Altura (m)
-      <input type="number" id="altura_m" name="altura_m" step="0.1" placeholder="Altura da árvore">
-    </label>
-    <label for="inclinacao">Inclinação
-      <input type="text" id="inclinacao" name="inclinacao" placeholder="Ex: reta, pendida, graus">
-    </label>
-    <label for="vigor">Vigor
-      <input type="text" id="vigor" name="vigor" placeholder="Ex: sadio, declínio, morta-em-pé">
-    </label>
-    <label for="morfotipo">Morfotipo/Espécie
-      <input type="text" id="morfotipo" name="morfotipo" placeholder="Morfotipo ou espécie">
-    </label>
-    <label for="dist_toe_m">Distância ao Toe (m)
-      <input type="number" id="dist_toe_m" name="dist_toe_m" step="0.1" placeholder="Distância ao toe">
-    </label>
-    <label for="dist_ombreira_m">Distância à Ombreira (m)
-      <input type="number" id="dist_ombreira_m" name="dist_ombreira_m" step="0.1" placeholder="Distância à ombreira">
-    </label>
-    <label for="dist_estrutura_m">Distância à Estrutura (m)
-      <input type="number" id="dist_estrutura_m" name="dist_estrutura_m" step="0.1" placeholder="Distância à estrutura">
-    </label>
-    <label for="posicao">Posição (talude/berma/planície)
-      <input type="text" id="posicao" name="posicao" placeholder="Talude, berma ou planície">
-    </label>
-    <label for="raizes_expostas">Raízes expostas (S/N)
-      <select id="raizes_expostas" name="raizes_expostas">
-        <option value="">Selecione</option>
-        <option value="S">S</option>
-        <option value="N">N</option>
-      </select>
-    </label>
-    <label for="toco_antigo">Toco antigo (S/N)
-      <select id="toco_antigo" name="toco_antigo">
-        <option value="">Selecione</option>
-        <option value="S">S</option>
-        <option value="N">N</option>
-      </select>
-    </label>
-    <label for="sinais_umidade">Sinais de umidade (S/N)
-      <select id="sinais_umidade" name="sinais_umidade">
-        <option value="">Selecione</option>
-        <option value="S">S</option>
-        <option value="N">N</option>
-      </select>
-    </label>
-    <label for="observacoes">Observações
-      <textarea id="observacoes" name="observacoes" rows="3" placeholder="Observações adicionais"></textarea>
-    </label>
-    <label for="fotos">Fotos (pode selecionar várias)
-      <input type="file" id="fotos" name="fotos" accept="image/*" multiple>
-    </label>
-  </form>
-  <div class="buttons">
-    <button id="locBtn" type="button">Capturar Geolocalização</button>
-    <button id="saveBtn" type="button">Salvar Registro</button>
-    <!-- Botão para cancelar edição, fica escondido até entrar em modo de edição -->
-    <button id="cancelEditBtn" type="button" style="display:none; background:#757575; color:#fff;">Cancelar Edição</button>
-    <button id="downloadDocsBtn" type="button">Baixar arquivos Word</button>
-    <button id="downloadExcelBtn" type="button">Baixar Planilha Excel</button>
-    <button id="clearRecordsBtn" type="button">Limpar Registros</button>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+  <main class="wrap" id="topo">
+
+    <div class="feed" id="conteudo" aria-label="Landing page em formato de feed">
+
+      <section class="post" aria-label="Abertura">
+        <div class="hero">
+          <div class="pill-row" aria-label="Selos do clube">
+            <div class="pill"><span class="dot" aria-hidden="true"></span> Encontro online semanal</div>
+            <div class="pill" aria-label="Certificado mensal">
+              <span class="ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 3h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="white"/>
+                  <path d="M8 7h8M8 10h8" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M12 16.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z" fill="#0f172a" opacity="0.14"/>
+                  <path d="M11.2 16.7 10 21l2-1 2 1-1.2-4.3" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Certificado mensal 30 horas
+            </div>
+            <div class="pill" aria-label="Mão na massa">
+              <span class="ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 12.2c1.4-1.8 3.5-3.2 6-3.2 2.4 0 4.4 1.3 5.8 3.1" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M6 15.8c1.8 2.1 4.2 3.2 7 3.2 2.7 0 5.1-1.1 6.9-3.1" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M12 6v3" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </span>
+              Mão na massa
+            </div>
+          </div>
+
+          <h1>Clube de Pesquisa e Desenvolvimento Científico</h1>
+          <div class="headline">Autonomia científica para a vida profissional. Você aprende a produzir com método e clareza e ganha independência para escrever e analisar.</div>
+
+          <p class="subtitle">Para estudantes de Biologia, Medicina Veterinária, Agronomia, Odontologia, Fisioterapia e áreas relacionadas. Um encontro online por semana, mais direcionamentos no WhatsApp, com <span class="badge"><span class="rlogo" aria-hidden="true"><img src="https://www.r-project.org/logo/Rlogo.svg" alt="" loading="lazy" decoding="async" /></span> R aplicado</span> em doses curtas.</p>
+
+          <div class="mini-nav" aria-label="Atalhos">
+            <a class="chip" href="#valor">Valor <small>e incluso</small></a>
+            <a class="chip" href="#horario">Horário <small>fixo</small></a>
+            <a class="chip" href="#funciona">Formato <small>dos sábados</small></a>
+            <a class="chip" href="#perfil">Mediador <small>perfil</small></a>
+          </div>
+
+          <div class="cta-row">
+            <a class="btn primary" id="ctaHero" href="#whats">Falar no WhatsApp</a>
+            <a class="btn ghost" href="#valor">Ver detalhes</a>
+          </div>
+
+          <div class="bullets" aria-label="Benefícios em destaque">
+            <div class="bullet">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.2 16.6 5.6 13l1.4-1.4 2.2 2.2 7-7L17.6 8l-8.4 8.6Z" fill="#0f172a"/></svg>
+              </div>
+              <div>Encontros alternados com desenvolvimento científico e discussão de artigos</div>
+            </div>
+            <div class="bullet">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.2 16.6 5.6 13l1.4-1.4 2.2 2.2 7-7L17.6 8l-8.4 8.6Z" fill="#0f172a"/></svg>
+              </div>
+              <div>Orientação prática para TCC, IC, pré projeto, artigo e resumo</div>
+            </div>
+            <div class="bullet">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.2 16.6 5.6 13l1.4-1.4 2.2 2.2 7-7L17.6 8l-8.4 8.6Z" fill="#0f172a"/></svg>
+              </div>
+              <div><span class="badge"><span class="rlogo" aria-hidden="true"><img src="https://www.r-project.org/logo/Rlogo.svg" alt="" loading="lazy" decoding="async" /></span> R aplicado</span> para análise e interpretação de dados com clareza</div>
+            </div>
+            <div class="bullet">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.2 16.6 5.6 13l1.4-1.4 2.2 2.2 7-7L17.6 8l-8.4 8.6Z" fill="#0f172a"/></svg>
+              </div>
+              <div>WhatsApp com direcionamentos e novidades, mínimo de 1 e máximo de 10 por semana</div>
+            </div>
+            <div class="bullet">
+              <div class="check" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.2 16.6 5.6 13l1.4-1.4 2.2 2.2 7-7L17.6 8l-8.4 8.6Z" fill="#0f172a"/></svg>
+              </div>
+              <div>Revisão e dicas rápidas para seu TCC e projetos científicos</div>
+            </div>
+          </div>
+
+          <p class="tiny">Matrícula e dúvidas pelo WhatsApp. Pagamento tratado no contato.</p>
+        </div>
+      </section>
+
+      <section class="post anchor-target" id="valor" aria-label="Valor e inclusão">
+        <div class="post-inner">
+          <h2>Valor e o que está incluso</h2>
+          <div class="price"><strong>R$ 150</strong><span>mensal por pessoa</span></div>
+
+          <div class="split">
+            <div class="box emph">
+              <h3>Incluso na mensalidade</h3>
+              <ul>
+                <li>1 encontro online por semana</li>
+                <li>Certificado mensal com 30 horas extracurriculares</li>
+                <li>Orientação prática e estratégica em grupo</li>
+                <li><span class="badge"><span class="rlogo" aria-hidden="true"><img src="https://www.r-project.org/logo/Rlogo.svg" alt="" loading="lazy" decoding="async" /></span> R aplicado</span> em doses curtas e consistentes</li>
+                <li>Dicas, artigos resumidos e direcionamentos no WhatsApp</li>
+                <li>Revisão e dicas rápidas para seu TCC e projetos científicos</li>
+                <li>Revisão e sugestão simples de participação em congresso</li>
+              </ul>
+            </div>
+
+            <div class="box">
+              <h3>À parte quando necessário</h3>
+              <ul>
+                <li>Mentoria particular e acompanhamento individual</li>
+                <li>Revisão profunda de trabalho completo</li>
+              </ul>
+              <p class="tiny">Aprofundamento individual é cobrado à parte, com agenda limitada.</p>
+            </div>
+          </div>
+
+          <div class="cta-row" style="margin-top: 14px;">
+            <a class="btn primary" href="#whats">Quero entrar pelo WhatsApp</a>
+            <a class="btn" href="#horario">Ver horário do encontro</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="post" aria-label="Autonomia científica">
+        <div class="post-inner">
+          <h2>Autonomia científica na prática</h2>
+          <p>O foco é execução com base teórica. Você aprende fazendo e constrói rotina de produção com decisões claras.</p>
+
+          <div class="split">
+            <div class="box">
+              <h3>O que você passa a dominar</h3>
+              <ul>
+                <li>Leitura crítica e decisão de método</li>
+                <li>Escrita com estrutura e objetivo</li>
+                <li>Resultado bem comunicado e bem defendido</li>
+              </ul>
+            </div>
+            <div class="box">
+              <h3>O que você deixa para trás</h3>
+              <ul>
+                <li>Dependência para análise de dados</li>
+                <li>Travamento para escrever e revisar</li>
+                <li>Aplicação sem entender o porquê</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="post anchor-target" id="horario" aria-label="Horário fixo">
+        <div class="post-inner">
+          <h2>Horário fixo e rotina</h2>
+          <div class="split">
+            <div class="box">
+              <h3>Encontro online semanal</h3>
+              <ul>
+                <li>Sábados das 9h30 às 10h30</li>
+                <li>Pode estender até 11h quando necessário</li>
+                <li>Os sábados alternam dois formatos</li>
+              </ul>
+              <div class="note"><b>Certificado</b> emissão ao final do mês com 30 horas</div>
+            </div>
+            <div class="box">
+              <h3>WhatsApp durante a semana</h3>
+              <ul>
+                <li>Envios em qualquer horário</li>
+                <li>Mínimo de 1 por semana e máximo de 10</li>
+                <li>Dicas, artigos resumidos e direcionamentos</li>
+              </ul>
+              <div class="note"><b>Regra</b> dúvida longa vira pauta do encontro</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="post anchor-target" id="funciona" aria-label="Como funciona">
+        <div class="post-inner">
+          <h2>Como funciona nos sábados</h2>
+          <p>Os sábados alternam dois formatos. Um sábado foca em desenvolvimento científico. No outro sábado os participantes apresentam e discutem artigos ou questões científicas.</p>
+
+          <div class="split">
+            <div class="box">
+              <h3>Sábado de desenvolvimento científico</h3>
+              <ul>
+                <li>Aula curta e aplicada sobre método e estratégia</li>
+                <li>Exercício simples para aplicar na semana</li>
+                <li>Direção para TCC, IC, pré projeto, artigo e resumo</li>
+                <li>Estruturação profissional com LinkedIn e tipos de posts</li>
+              </ul>
+            </div>
+
+            <div class="box">
+              <h3>Sábado de artigos e questões científicas</h3>
+              <ul>
+                <li>Apresentação por participantes com template simples</li>
+                <li>Discussão guiada para leitura crítica e método</li>
+                <li>Fechamento com decisão prática para o seu trabalho</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="cta-row" style="margin-top: 14px;">
+            <a class="btn primary" href="#whats">Tirar dúvidas no WhatsApp</a>
+          </div>
+
+          <p class="tiny">O clube orienta e dá direção. Não faz o trabalho no lugar do participante. Pedidos ligados a prova, cola ou produção sem autoria não são atendidos.</p>
+        </div>
+      </section>
+
+      <section class="post" aria-label="R aplicado">
+        <div class="post-inner">
+          <h2>R aplicado em doses curtas</h2>
+          <p>O R entra como prática curta e recorrente. O foco é você ganhar autonomia para organizar dados, gerar gráficos e interpretar resultados.</p>
+
+          <div class="split">
+            <div class="box">
+              <h3>O que você aprende aos poucos</h3>
+              <ul>
+                <li>Organização de dados e boas práticas</li>
+                <li>Gráficos claros para artigo e apresentação</li>
+                <li>Noções de teste e interpretação de resultado</li>
+              </ul>
+            </div>
+            <div class="box">
+              <h3>O que isso destrava</h3>
+              <ul>
+                <li>Velocidade para produzir com consistência</li>
+                <li>Segurança para defender método e análise</li>
+                <li>Clareza para escrever resultados</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="post" aria-label="Perguntas frequentes">
+        <div class="post-inner">
+          <h2>Perguntas frequentes</h2>
+
+          <details>
+            <summary>Preciso já ter tema ou projeto</summary>
+            <p>Não. O clube funciona para quem está começando e para quem já tem TCC, IC ou pré projeto. O direcionamento muda conforme seu momento.</p>
+          </details>
+
+          <details>
+            <summary>Como escolhemos os artigos ou questões</summary>
+            <p>Os participantes sugerem. Quando alguém apresentar, envia o material e um resumo curto antes do encontro para manter a discussão objetiva.</p>
+          </details>
+
+          <details>
+            <summary>O que entra nas revisões rápidas</summary>
+            <p>Dúvidas específicas e trechos curtos, como objetivo, método, resumo, estrutura de resultados, figuras e tabelas. Acompanhamento individual é à parte.</p>
+          </details>
+
+          <details>
+            <summary>Como funciona a matrícula</summary>
+            <p>Você chama no WhatsApp. Eu explico o formato, os próximos horários e o processo de pagamento.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="post anchor-target" id="perfil" aria-label="Perfil do mediador">
+        <div class="post-inner profile">
+          <div class="avatar" aria-label="Foto do mediador">
+            <img src="https://i1.rgstatic.net/ii/profile.image/591755300851720-1518096866872_Q512/Danilo-Rangel.jpg" alt="Foto de Danilo Rangel" loading="lazy" decoding="async" />
+          </div>
+          <div>
+            <h2>Mediador Danilo Rangel</h2>
+            <p>Biólogo pela UENF e Mestre em Ecologia e Biodiversidade pela UNIFESP. Mediação focada em método, execução e autonomia para você aplicar na sua rotina de produção científica.</p>
+
+            <div class="kpi" aria-label="Destaques do mediador">
+              <div class="k"><b>Primeiro lugar</b> no processo seletivo do mestrado na UNIFESP</div>
+              <div class="k"><b>Seis artigos</b> publicados durante o mestrado</div>
+              <div class="k"><b>Dissertação</b> publicada na semana anterior à defesa</div>
+            </div>
+
+            <div class="bar" aria-hidden="true"></div>
+
+            <h3>Artigos em destaque</h3>
+            <div class="linklist" aria-label="Links de artigos">
+              <a class="alink" href="https://www.researchgate.net/publication/304000004_Nests_of_the_brown_booby_Sula_leucogaster_as_a_potential_indicator_of_tropical_ocean_pollution_by_marine_debris" target="_blank" rel="noopener">
+                <div>Nests of the brown booby as indicator of marine debris</div>
+                <span>103 citações</span>
+              </a>
+              <a class="alink" href="https://www.researchgate.net/publication/322953129_Evidence_of_marine_debris_usage_by_the_ghost_crab_Ocypode_quadrata_Fabricius_1787" target="_blank" rel="noopener">
+                <div>Evidence of marine debris usage by the ghost crab</div>
+                <span>40 citações</span>
+              </a>
+              <a class="alink" href="https://www.researchgate.net/publication/357617363_Pokemon_as_a_playful_and_didactic_tool_for_teaching_about_ecological_interactions" target="_blank" rel="noopener">
+                <div>Pokémon as a playful and didactic tool for teaching ecology</div>
+                <span>6 citações</span>
+              </a>
+              <a class="alink" href="https://scholar.google.com/citations?hl=pt-BR&user=mXSQJ7cAAAAJ" target="_blank" rel="noopener">
+                <div>Ver todos os artigos no Google Scholar</div>
+                <span>lista completa</span>
+              </a>
+            </div>
+
+            <div class="cta-row" id="whats" style="margin-top: 14px;">
+              <a class="btn primary" id="ctaBottom" href="#">Entrar pelo WhatsApp</a>
+              <a class="btn" href="#topo">Voltar ao topo</a>
+            </div>
+
+            <p class="tiny">Este é um programa educacional. Não substitui orientação formal da instituição e não faz o trabalho no lugar do participante.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <div class="float" aria-label="Barra fixa de WhatsApp">
+    <div class="float-inner">
+      <div class="left">
+        <b>Clube de Pesquisa e Desenvolvimento Científico</b>
+        <span>R$ 150 mensal, sábados 9h30, certificado mensal 30 horas</span>
+      </div>
+      <a class="wbtn" id="ctaFloat" href="#" aria-label="Abrir WhatsApp">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.2 21.4l1-3.5a8.6 8.6 0 1 1 3.1.6c-1.5 0-2.9-.4-4.1-1.1l-3.6 1z" fill="#0f172a" opacity="0.10"/>
+          <path d="M12 6.8c-2.4 0-4.4 1.8-4.4 4.1 0 2.2 2 4.3 4.4 6.4 2.4-2.1 4.4-4.2 4.4-6.4 0-2.3-2-4.1-4.4-4.1Z" fill="#0f172a" opacity="0.10"/>
+          <path d="M16.6 14.8c-.2-.1-1.2-.6-1.4-.7-.2-.1-.4-.1-.6.1-.2.2-.6.7-.8.9-.1.2-.3.2-.5.1-1.5-.7-2.7-1.7-3.6-3.1-.1-.2 0-.4.1-.5.1-.1.2-.3.3-.4.1-.1.2-.3.2-.4.1-.2 0-.4 0-.5l-.7-1.7c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.4-.2.3-1 1-1 2.4 0 1.4 1 2.8 1.2 3 .1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.4-.2Z" fill="#0f172a"/>
+        </svg>
+        WhatsApp
+      </a>
+    </div>
   </div>
 
-  <!-- Lista de registros salvos para edição/exclusão -->
-  <h2 style="margin-top:30px;">Registros Salvos</h2>
-  <div id="recordsList"></div>
+  <noscript>
+    <div style="max-width:920px;margin:16px auto;padding:12px 16px;border:1px solid rgba(15,23,42,0.12);border-radius:18px;background:rgba(255,255,255,0.92);font-family:ui-sans-serif,system-ui;color:rgba(15,23,42,0.78)">
+      Para abrir o WhatsApp com mensagem pronta, ative o JavaScript do navegador.
+    </div>
+  </noscript>
 
   <script>
-    // Armazena registros carregando de localStorage
-    let records = [];
-    function loadRecords() {
-      try {
-        const stored = localStorage.getItem('floraRecords');
-        if (stored) {
-          records = JSON.parse(stored);
-        }
-      } catch (e) {
-        records = [];
-      }
-    }
-    function saveToStorage() {
-      localStorage.setItem('floraRecords', JSON.stringify(records));
-    }
-    loadRecords();
-    // Render lista de registros assim que a página carregar
-    document.addEventListener('DOMContentLoaded', function() {
-      renderRecords();
-    });
+    (function () {
+      var phone = '5522997525542';
+      var text = 'Oi Danilo, vi o Clube de Pesquisa e Desenvolvimento Científico e quero saber como entrar.';
+      var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
 
-    // Geolocalização
-    document.getElementById('locBtn').addEventListener('click', function() {
-      if (!navigator.geolocation) {
-        alert('Geolocalização não suportada pelo navegador');
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(function(position) {
-        document.getElementById('x').value = position.coords.latitude.toFixed(6);
-        document.getElementById('y').value = position.coords.longitude.toFixed(6);
-      }, function(error) {
-        alert('Erro ao obter geolocalização: ' + error.message);
-      }, { enableHighAccuracy: true });
-    });
-
-    // Leitura de imagens como DataURL
-    function handleImageFiles(files) {
-      const promises = [];
-      for (const file of files) {
-        promises.push(new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        }));
-      }
-      return Promise.all(promises);
-    }
-
-    // Salvar ou atualizar registro
-    document.getElementById('saveBtn').addEventListener('click', async function() {
-      const fields = ['id_arvore','x','y','DAP_cm','altura_m','inclinacao','vigor','morfotipo','dist_toe_m','dist_ombreira_m','dist_estrutura_m','posicao','raizes_expostas','toco_antigo','sinais_umidade','observacoes'];
-      const newRecord = {};
-      fields.forEach(id => {
-        const el = document.getElementById(id);
-        let value = el.value.trim();
-        if (!value) value = 'NA';
-        newRecord[id] = value;
-      });
-      const imageInput = document.getElementById('fotos');
-      // Se houver arquivos selecionados, substituir fotos. Caso contrário, manter fotos existentes (em modo edição)
-      let images = [];
-      if (imageInput.files && imageInput.files.length > 0) {
-        images = await handleImageFiles(imageInput.files);
-      }
-      if (editIndex === null || editIndex === undefined) {
-        // Novo registro
-        newRecord.fotos = images;
-        records.push(newRecord);
-        alert('Registro salvo com sucesso!');
-      } else {
-        // Atualizar registro existente
-        // Preservar fotos antigas se nenhuma nova foi selecionada
-        if (images.length > 0) {
-          newRecord.fotos = images;
-        } else {
-          newRecord.fotos = records[editIndex].fotos || [];
-        }
-        records[editIndex] = newRecord;
-        editIndex = null;
-        alert('Registro atualizado com sucesso!');
-        // Restaurar botão salvar e esconder cancelar
-        document.getElementById('saveBtn').textContent = 'Salvar Registro';
-        document.getElementById('cancelEditBtn').style.display = 'none';
-      }
-      saveToStorage();
-      // Limpar formulário e input de fotos
-      document.getElementById('floraForm').reset();
-      // Importante: limpar valor do input file para permitir selecionar as mesmas fotos novamente no futuro
-      imageInput.value = '';
-      renderRecords();
-    });
-
-    // Gerar arquivos Word (.doc) para cada registro
-    document.getElementById('downloadDocsBtn').addEventListener('click', function() {
-      if (records.length === 0) {
-        alert('Nenhum registro para exportar');
-        return;
-      }
-      records.forEach((record, index) => {
-        let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Registro ' + (index+1) + '</title></head><body>';
-        for (const key of Object.keys(record)) {
-          if (key !== 'fotos') {
-            html += '<p><strong>' + key + ':</strong> ' + record[key] + '</p>';
-          }
-        }
-        if (record.fotos && record.fotos.length > 0) {
-          html += '<h2>Fotos</h2>';
-          record.fotos.forEach(src => {
-            html += '<p><img src="' + src + '" style="max-width:600px; margin-bottom:10px;"></p>';
-          });
-        }
-        html += '</body></html>';
-        const blob = new Blob([html], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const filename = (record.id_arvore && record.id_arvore !== 'NA') ? record.id_arvore : 'registro_' + (index+1);
-        a.download = filename + '.doc';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
-    });
-
-    // Gerar planilha Excel (.xls) com todos os registros
-    document.getElementById('downloadExcelBtn').addEventListener('click', function() {
-      if (records.length === 0) {
-        alert('Nenhum registro para exportar');
-        return;
-      }
-      const headers = ['id_arvore','x','y','DAP_cm','altura_m','inclinacao','vigor','morfotipo','dist_toe_m','dist_ombreira_m','dist_estrutura_m','posicao','raizes_expostas','toco_antigo','sinais_umidade','observacoes','fotos'];
-      let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><table border="1" style="border-collapse:collapse;">';
-      // Header row
-      html += '<tr>';
-      headers.forEach(h => {
-        html += '<th style="background:#e0e0e0;">' + h + '</th>';
-      });
-      html += '</tr>';
-      // Data rows
-      records.forEach(record => {
-        html += '<tr>';
-        headers.forEach(h => {
-          if (h === 'fotos') {
-            html += '<td>';
-            if (record.fotos && record.fotos.length > 0) {
-              record.fotos.forEach(src => {
-                html += '<img src="' + src + '" style="max-width:100px; max-height:100px; margin-right:5px;">';
-              });
-            } else {
-              html += 'NA';
-            }
-            html += '</td>';
-          } else {
-            const val = record[h] || 'NA';
-            html += '<td>' + val + '</td>';
-          }
-        });
-        html += '</tr>';
-      });
-      html += '</table></body></html>';
-      const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'registros_flora.xls';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-
-    // Limpar registros
-    document.getElementById('clearRecordsBtn').addEventListener('click', function() {
-      if (confirm('Deseja realmente limpar todos os registros?')) {
-        records = [];
-        saveToStorage();
-        alert('Registros apagados.');
-        renderRecords();
-      }
-    });
-
-    // Variável para rastrear índice de edição (null significa novo registro)
-    let editIndex = null;
-
-    // Renderiza a lista de registros salvos com botões de editar/excluir
-    function renderRecords() {
-      const listDiv = document.getElementById('recordsList');
-      if (!listDiv) return;
-      if (!records || records.length === 0) {
-        listDiv.innerHTML = '<p>Nenhum registro salvo.</p>';
-        return;
-      }
-      let html = '<table style="width:100%; border-collapse:collapse;">';
-      html += '<tr style="background:#eeeeee;"><th style="padding:5px; border:1px solid #ccc;">#</th><th style="padding:5px; border:1px solid #ccc;">ID</th><th style="padding:5px; border:1px solid #ccc;">Ações</th></tr>';
-      records.forEach((rec, idx) => {
-        const idVal = rec.id_arvore && rec.id_arvore !== 'NA' ? rec.id_arvore : '(sem ID)';
-        html += '<tr>';
-        html += '<td style="padding:5px; border:1px solid #ccc;">' + (idx + 1) + '</td>';
-        html += '<td style="padding:5px; border:1px solid #ccc;">' + idVal + '</td>';
-        html += '<td style="padding:5px; border:1px solid #ccc;">' +
-                 '<button class="editBtn" data-index="' + idx + '" style="margin-right:5px; background:#1976d2; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Editar</button>' +
-                 '<button class="deleteBtn" data-index="' + idx + '" style="background:#d32f2f; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Excluir</button>' +
-                 '</td>';
-        html += '</tr>';
-      });
-      html += '</table>';
-      listDiv.innerHTML = html;
-      // Adicionar listeners para cada botão
-      listDiv.querySelectorAll('.editBtn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const idx = parseInt(this.getAttribute('data-index'));
-          editRecord(idx);
-        });
-      });
-      listDiv.querySelectorAll('.deleteBtn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const idx = parseInt(this.getAttribute('data-index'));
-          if (confirm('Deseja excluir este registro?')) {
-            records.splice(idx, 1);
-            saveToStorage();
-            renderRecords();
-          }
-        });
-      });
-    }
-
-    // Iniciar edição de um registro existente
-    function editRecord(idx) {
-      editIndex = idx;
-      const rec = records[idx];
-      const fields = ['id_arvore','x','y','DAP_cm','altura_m','inclinacao','vigor','morfotipo','dist_toe_m','dist_ombreira_m','dist_estrutura_m','posicao','raizes_expostas','toco_antigo','sinais_umidade','observacoes'];
-      fields.forEach(id => {
-        const el = document.getElementById(id);
+      function bind(id) {
+        var el = document.getElementById(id);
         if (!el) return;
-        const val = rec[id];
-        el.value = (val && val !== 'NA') ? val : '';
-      });
-      // Não podemos definir value do input file. Informar usuário que fotos serão preservadas a menos que substituídas
-      alert('Modo edição: fotos atuais serão mantidas. Se desejar substituir, selecione novas fotos.');
-      // Atualizar rótulo do botão
-      document.getElementById('saveBtn').textContent = 'Atualizar Registro';
-      document.getElementById('cancelEditBtn').style.display = 'inline-block';
-    }
+        el.setAttribute('href', url);
+        el.setAttribute('rel', 'noopener');
+        el.setAttribute('target', '_blank');
+      }
 
-    // Cancelar edição
-    document.getElementById('cancelEditBtn').addEventListener('click', function() {
-      editIndex = null;
-      document.getElementById('floraForm').reset();
-      document.getElementById('saveBtn').textContent = 'Salvar Registro';
-      this.style.display = 'none';
-    });
+      bind('ctaHero');
+      bind('ctaBottom');
+      bind('ctaFloat');
 
-    // Registrar service worker para funcionamento offline e instalação estilo PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('service-worker.js').catch(function(err) {
-          console.log('Falha ao registrar service worker:', err);
+      var anchors = document.querySelectorAll('a[href^="#"]');
+      anchors.forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var href = a.getAttribute('href');
+          if (!href || href === '#') return;
+          var target = document.querySelector(href);
+          if (!target) return;
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
-    }
+    })();
   </script>
 </body>
 </html>
