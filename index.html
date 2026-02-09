@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplicativo de Monitoramento de Flora</title>
+  <!-- Manifesto PWA para permitir instalação offline -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e7d32">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    input, select, textarea {
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+    textarea {
+      resize: vertical;
+    }
+    .buttons {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    #locBtn { background: #0288d1; color: #fff; }
+    #saveBtn { background: #2e7d32; color: #fff; }
+    #downloadDocsBtn { background: #6a1b9a; color: #fff; }
+    #downloadExcelBtn { background: #ef6c00; color: #fff; }
+    #clearRecordsBtn { background: #c62828; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>Monitoramento de Flora</h1>
+  <form id="floraForm" onsubmit="return false;">
+    <label for="id_arvore">ID da árvore
+      <input type="text" id="id_arvore" name="id_arvore" placeholder="Identificador único da árvore">
+    </label>
+    <label for="x">Latitude (x)
+      <input type="text" id="x" name="x" placeholder="Latitude">
+    </label>
+    <label for="y">Longitude (y)
+      <input type="text" id="y" name="y" placeholder="Longitude">
+    </label>
+    <label for="DAP_cm">DAP (cm)
+      <input type="number" id="DAP_cm" name="DAP_cm" step="0.1" placeholder="Diâmetro à altura do peito">
+    </label>
+    <label for="altura_m">Altura (m)
+      <input type="number" id="altura_m" name="altura_m" step="0.1" placeholder="Altura da árvore">
+    </label>
+    <label for="inclinacao">Inclinação
+      <input type="text" id="inclinacao" name="inclinacao" placeholder="Ex: reta, pendida, graus">
+    </label>
+    <label for="vigor">Vigor
+      <input type="text" id="vigor" name="vigor" placeholder="Ex: sadio, declínio, morta-em-pé">
+    </label>
+    <label for="morfotipo">Morfotipo/Espécie
+      <input type="text" id="morfotipo" name="morfotipo" placeholder="Morfotipo ou espécie">
+    </label>
+    <label for="dist_toe_m">Distância ao Toe (m)
+      <input type="number" id="dist_toe_m" name="dist_toe_m" step="0.1" placeholder="Distância ao toe">
+    </label>
+    <label for="dist_ombreira_m">Distância à Ombreira (m)
+      <input type="number" id="dist_ombreira_m" name="dist_ombreira_m" step="0.1" placeholder="Distância à ombreira">
+    </label>
+    <label for="dist_estrutura_m">Distância à Estrutura (m)
+      <input type="number" id="dist_estrutura_m" name="dist_estrutura_m" step="0.1" placeholder="Distância à estrutura">
+    </label>
+    <label for="posicao">Posição (talude/berma/planície)
+      <input type="text" id="posicao" name="posicao" placeholder="Talude, berma ou planície">
+    </label>
+    <label for="raizes_expostas">Raízes expostas (S/N)
+      <select id="raizes_expostas" name="raizes_expostas">
+        <option value="">Selecione</option>
+        <option value="S">S</option>
+        <option value="N">N</option>
+      </select>
+    </label>
+    <label for="toco_antigo">Toco antigo (S/N)
+      <select id="toco_antigo" name="toco_antigo">
+        <option value="">Selecione</option>
+        <option value="S">S</option>
+        <option value="N">N</option>
+      </select>
+    </label>
+    <label for="sinais_umidade">Sinais de umidade (S/N)
+      <select id="sinais_umidade" name="sinais_umidade">
+        <option value="">Selecione</option>
+        <option value="S">S</option>
+        <option value="N">N</option>
+      </select>
+    </label>
+    <label for="observacoes">Observações
+      <textarea id="observacoes" name="observacoes" rows="3" placeholder="Observações adicionais"></textarea>
+    </label>
+    <label for="fotos">Fotos (pode selecionar várias)
+      <input type="file" id="fotos" name="fotos" accept="image/*" multiple>
+    </label>
+  </form>
+  <div class="buttons">
+    <button id="locBtn" type="button">Capturar Geolocalização</button>
+    <button id="saveBtn" type="button">Salvar Registro</button>
+    <!-- Botão para cancelar edição, fica escondido até entrar em modo de edição -->
+    <button id="cancelEditBtn" type="button" style="display:none; background:#757575; color:#fff;">Cancelar Edição</button>
+    <button id="downloadDocsBtn" type="button">Baixar arquivos Word</button>
+    <button id="downloadExcelBtn" type="button">Baixar Planilha Excel</button>
+    <button id="clearRecordsBtn" type="button">Limpar Registros</button>
+  </div>
+
+  <!-- Lista de registros salvos para edição/exclusão -->
+  <h2 style="margin-top:30px;">Registros Salvos</h2>
+  <div id="recordsList"></div>
+
+  <script>
+    // Armazena registros carregando de localStorage
+    let records = [];
+    function loadRecords() {
+      try {
+        const stored = localStorage.getItem('floraRecords');
+        if (stored) {
+          records = JSON.parse(stored);
+        }
+      } catch (e) {
+        records = [];
+      }
+    }
+    function saveToStorage() {
+      localStorage.setItem('floraRecords', JSON.stringify(records));
+    }
+    loadRecords();
+    // Render lista de registros assim que a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      renderRecords();
+    });
+
+    // Geolocalização
+    document.getElementById('locBtn').addEventListener('click', function() {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não suportada pelo navegador');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(function(position) {
+        document.getElementById('x').value = position.coords.latitude.toFixed(6);
+        document.getElementById('y').value = position.coords.longitude.toFixed(6);
+      }, function(error) {
+        alert('Erro ao obter geolocalização: ' + error.message);
+      }, { enableHighAccuracy: true });
+    });
+
+    // Leitura de imagens como DataURL
+    function handleImageFiles(files) {
+      const promises = [];
+      for (const file of files) {
+        promises.push(new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        }));
+      }
+      return Promise.all(promises);
+    }
+
+    // Salvar ou atualizar registro
+    document.getElementById('saveBtn').addEventListener('click', async function() {
+      const fields = ['id_arvore','x','y','DAP_cm','altura_m','inclinacao','vigor','morfotipo','dist_toe_m','dist_ombreira_m','dist_estrutura_m','posicao','raizes_expostas','toco_antigo','sinais_umidade','observacoes'];
+      const newRecord = {};
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        let value = el.value.trim();
+        if (!value) value = 'NA';
+        newRecord[id] = value;
+      });
+      const imageInput = document.getElementById('fotos');
+      // Se houver arquivos selecionados, substituir fotos. Caso contrário, manter fotos existentes (em modo edição)
+      let images = [];
+      if (imageInput.files && imageInput.files.length > 0) {
+        images = await handleImageFiles(imageInput.files);
+      }
+      if (editIndex === null || editIndex === undefined) {
+        // Novo registro
+        newRecord.fotos = images;
+        records.push(newRecord);
+        alert('Registro salvo com sucesso!');
+      } else {
+        // Atualizar registro existente
+        // Preservar fotos antigas se nenhuma nova foi selecionada
+        if (images.length > 0) {
+          newRecord.fotos = images;
+        } else {
+          newRecord.fotos = records[editIndex].fotos || [];
+        }
+        records[editIndex] = newRecord;
+        editIndex = null;
+        alert('Registro atualizado com sucesso!');
+        // Restaurar botão salvar e esconder cancelar
+        document.getElementById('saveBtn').textContent = 'Salvar Registro';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+      }
+      saveToStorage();
+      // Limpar formulário e input de fotos
+      document.getElementById('floraForm').reset();
+      // Importante: limpar valor do input file para permitir selecionar as mesmas fotos novamente no futuro
+      imageInput.value = '';
+      renderRecords();
+    });
+
+    // Gerar arquivos Word (.doc) para cada registro
+    document.getElementById('downloadDocsBtn').addEventListener('click', function() {
+      if (records.length === 0) {
+        alert('Nenhum registro para exportar');
+        return;
+      }
+      records.forEach((record, index) => {
+        let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Registro ' + (index+1) + '</title></head><body>';
+        for (const key of Object.keys(record)) {
+          if (key !== 'fotos') {
+            html += '<p><strong>' + key + ':</strong> ' + record[key] + '</p>';
+          }
+        }
+        if (record.fotos && record.fotos.length > 0) {
+          html += '<h2>Fotos</h2>';
+          record.fotos.forEach(src => {
+            html += '<p><img src="' + src + '" style="max-width:600px; margin-bottom:10px;"></p>';
+          });
+        }
+        html += '</body></html>';
+        const blob = new Blob([html], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const filename = (record.id_arvore && record.id_arvore !== 'NA') ? record.id_arvore : 'registro_' + (index+1);
+        a.download = filename + '.doc';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    });
+
+    // Gerar planilha Excel (.xls) com todos os registros
+    document.getElementById('downloadExcelBtn').addEventListener('click', function() {
+      if (records.length === 0) {
+        alert('Nenhum registro para exportar');
+        return;
+      }
+      const headers = ['id_arvore','x','y','DAP_cm','altura_m','inclinacao','vigor','morfotipo','dist_toe_m','dist_ombreira_m','dist_estrutura_m','posicao','raizes_expostas','toco_antigo','sinais_umidade','observacoes','fotos'];
+      let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><table border="1" style="border-collapse:collapse;">';
+      // Header row
+      html += '<tr>';
+      headers.forEach(h => {
+        html += '<th style="background:#e0e0e0;">' + h + '</th>';
+      });
+      html += '</tr>';
+      // Data rows
+      records.forEach(record => {
+        html += '<tr>';
+        headers.forEach(h => {
+          if (h === 'fotos') {
+            html += '<td>';
+            if (record.fotos && record.fotos.length > 0) {
+              record.fotos.forEach(src => {
+                html += '<img src="' + src + '" style="max-width:100px; max-height:100px; margin-right:5px;">';
+              });
+            } else {
+              html += 'NA';
+            }
+            html += '</td>';
+          } else {
+            const val = record[h] || 'NA';
+            html += '<td>' + val + '</td>';
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</table></body></html>';
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'registros_flora.xls';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Limpar registros
+    document.getElementById('clearRecordsBtn').addEventListener('click', function() {
+      if (confirm('Deseja realmente limpar todos os registros?')) {
+        records = [];
+        saveToStorage();
+        alert('Registros apagados.');
+        renderRecords();
+      }
+    });
+
+    // Variável para rastrear índice de edição (null significa novo registro)
+    let editIndex = null;
+
+    // Renderiza a lista de registros salvos com botões de editar/excluir
+    function renderRecords() {
+      const listDiv = document.getElementById('recordsList');
+      if (!listDiv) return;
+      if (!records || records.length === 0) {
+        listDiv.innerHTML = '<p>Nenhum registro salvo.</p>';
+        return;
+      }
+      let html = '<table style="width:100%; border-collapse:collapse;">';
+      html += '<tr style="background:#eeeeee;"><th style="padding:5px; border:1px solid #ccc;">#</th><th style="padding:5px; border:1px solid #ccc;">ID</th><th style="padding:5px; border:1px solid #ccc;">Ações</th></tr>';
+      records.forEach((rec, idx) => {
+        const idVal = rec.id_arvore && rec.id_arvore !== 'NA' ? rec.id_arvore : '(sem ID)';
+        html += '<tr>';
+        html += '<td style="padding:5px; border:1px solid #ccc;">' + (idx + 1) + '</td>';
+        html += '<td style="padding:5px; border:1px solid #ccc;">' + idVal + '</td>';
+        html += '<td style="padding:5px; border:1px solid #ccc;">' +
+                 '<button class="editBtn" data-index="' + idx + '" style="margin-right:5px; background:#1976d2; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Editar</button>' +
+                 '<button class="deleteBtn" data-index="' + idx + '" style="background:#d32f2f; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Excluir</button>' +
+                 '</td>';
+        html += '</tr>';
+      });
+      html += '</table>';
+      listDiv.innerHTML = html;
+      // Adicionar listeners para cada botão
+      listDiv.querySelectorAll('.editBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const idx = parseInt(this.getAttribute('data-index'));
+          editRecord(idx);
+        });
+      });
+      listDiv.querySelectorAll('.deleteBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const idx = parseInt(this.getAttribute('data-index'));
+          if (confirm('Deseja excluir este registro?')) {
+            records.splice(idx, 1);
+            saveToStorage();
+            renderRecords();
+          }
+        });
+      });
+    }
+
+    // Iniciar edição de um registro existente
+    function editRecord(idx) {
+      editIndex = idx;
+      const rec = records[idx];
+      const fields = ['id_arvore','x','y','DAP_cm','altura_m','inclinacao','vigor','morfotipo','dist_toe_m','dist_ombreira_m','dist_estrutura_m','posicao','raizes_expostas','toco_antigo','sinais_umidade','observacoes'];
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const val = rec[id];
+        el.value = (val && val !== 'NA') ? val : '';
+      });
+      // Não podemos definir value do input file. Informar usuário que fotos serão preservadas a menos que substituídas
+      alert('Modo edição: fotos atuais serão mantidas. Se desejar substituir, selecione novas fotos.');
+      // Atualizar rótulo do botão
+      document.getElementById('saveBtn').textContent = 'Atualizar Registro';
+      document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    }
+
+    // Cancelar edição
+    document.getElementById('cancelEditBtn').addEventListener('click', function() {
+      editIndex = null;
+      document.getElementById('floraForm').reset();
+      document.getElementById('saveBtn').textContent = 'Salvar Registro';
+      this.style.display = 'none';
+    });
+
+    // Registrar service worker para funcionamento offline e instalação estilo PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js').catch(function(err) {
+          console.log('Falha ao registrar service worker:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
